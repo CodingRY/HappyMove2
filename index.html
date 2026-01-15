@@ -4,179 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Happy Move Mobile</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Kodchasan:wght@400;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
-    
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
         body { 
             font-family: 'Kodchasan', sans-serif; 
             margin: 0; padding: 10px; 
-            background-color: #f0f7f4; 
-            /* ใช้รูปภาพพื้นหลังที่คุณส่งมา */
             background-image: url('https://img5.pic.in.th/file/secure-sv1/42493.jpg'); 
-            background-size: cover; 
-            background-position: center;
-            background-attachment: fixed;
+            background-size: cover; background-position: center; background-attachment: fixed;
             display: flex; justify-content: center; align-items: center; min-height: 100vh;
         }
-
-        /* เปลี่ยนการ์ดสีขาวให้เป็นกระจกโปร่งแสง */
         .card { 
-            background: rgba(255, 255, 255, 0.35); /* ปรับให้ใสขึ้น */
-            padding: 30px 25px; 
-            border-radius: 40px; 
+            background: rgba(255, 255, 255, 0.3); /* กระจกใสมาก */
+            padding: 25px; border-radius: 40px; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            width: 100%; 
-            max-width: 400px; 
-            text-align: center; 
-            backdrop-filter: blur(12px); /* เอฟเฟกต์เบลอ */
-            -webkit-backdrop-filter: blur(12px);
+            width: 100%; max-width: 400px; text-align: center; 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.4);
         }
-
-        h1 { color: #1e8449; font-size: 2.2rem; margin: 0; font-weight: 700; letter-spacing: -1px; text-shadow: 0 2px 4px rgba(255,255,255,0.5); }
-        p { font-size: 1.1rem; color: #2c3e50; margin: 5px 0 25px 0; font-weight: 600; }
-
+        .icon-box { width: 100px; height: 100px; margin: 0 auto 10px; border-radius: 20px; overflow: hidden; }
+        .icon-box img { width: 100%; height: 100%; object-fit: cover; }
+        h1 { color: #1e8449; font-size: 2rem; margin: 0; font-weight: 700; }
         #canvas-container { 
             position: relative; width: 100%; aspect-ratio: 1 / 1; 
-            margin: 0 auto 20px auto; border: 6px solid #2ecc71; 
-            border-radius: 35px; background: #000; overflow: hidden;
-            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.3);
+            margin: 15px auto; border: 6px solid #2ecc71; 
+            border-radius: 30px; background: #000; overflow: hidden;
         }
-
         canvas { width: 100% !important; height: 100% !important; object-fit: cover; }
-
-        .counter { font-size: 6.5rem; font-weight: 700; color: #1e8449; line-height: 1; margin-bottom: 15px; }
-        
-        /* แถบสถานะแบบโปร่งแสง */
+        .counter { font-size: 6rem; font-weight: 700; color: #1e8449; line-height: 1; }
         .status-bar { 
-            background: rgba(255, 255, 255, 0.4); 
-            padding: 15px; border-radius: 25px; 
-            margin-bottom: 25px; border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.4); padding: 12px; 
+            border-radius: 20px; margin: 15px 0; border: 1px solid rgba(255, 255, 255, 0.3);
         }
-        
         button { 
             background: #27ae60; color: white; border: none; width: 100%; 
-            padding: 20px; border-radius: 50px; font-size: 1.4rem; 
+            padding: 18px; border-radius: 50px; font-size: 1.3rem; 
             cursor: pointer; font-weight: 700; font-family: 'Kodchasan', sans-serif;
             box-shadow: 0 8px 20px rgba(39, 174, 96, 0.4);
-            transition: all 0.3s ease;
         }
-        button:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
-
     <div class="card">
+        <div class="icon-box">
+            <img src="https://img5.pic.in.th/file/secure-sv1/42494.jpg" alt="Neck Icon">
+        </div>
         <h1>Happy Move</h1>
-        <p>เป้าหมาย: เอียงคอให้ครบ 4 ครั้ง</p>
-
-        <div id="canvas-container">
-            <canvas id="canvas"></canvas>
-        </div>
-
-        <div class="counter">
-            <span id="count-number">0</span><span style="font-size: 1.8rem; color: #2c3e50; opacity: 0.5; margin-left: 5px;">/ 4</span>
-        </div>
-
+        <div id="canvas-container"><canvas id="canvas"></canvas></div>
+        <div class="counter"><span id="count-number">0</span><span style="font-size: 1.5rem; opacity: 0.5;"> / 4</span></div>
         <div class="status-bar">
-            <div style="font-weight: 700; color: #2c3e50;">สถานะ: <span id="status-text" style="color: #1e8449;">รอกดเริ่ม</span></div>
-            <div style="font-size: 0.85rem; color: #4a6655; margin-top: 5px;">ความแม่นยำ: <span id="confidence-text">0%</span></div>
+            <div style="font-weight: 700;">สถานะ: <span id="status-text" style="color: #1e8449;">รอกดเริ่ม</span></div>
         </div>
-
         <button id="start-btn" onclick="init()">เริ่มใช้งานกล้อง</button>
     </div>
 
     <script>
         const URL = "https://teachablemachine.withgoogle.com/models/aF6V2Gf5k/";
-        let model, webcam, ctx, isRunning = false;
-        let count = 0;
-        let lastClass = "";
+        let model, webcam, ctx, isRunning = false, count = 0, lastClass = "";
 
         async function init() {
             const btn = document.getElementById("start-btn");
             btn.innerText = "กำลังเปิดกล้อง...";
             btn.disabled = true;
-
             try {
-                // 1. บังคับขอสิทธิ์ใช้งานกล้องจาก Browser (แก้ปัญหาเข้าถึงกล้องไม่ได้)
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                stream.getTracks().forEach(track => track.stop()); // ปิด stream ทันทีหลังได้สิทธิ์
-
-                // 2. โหลดโมเดล
+                // บังคับขอสิทธิ์ใช้งานกล้อง
+                await navigator.mediaDevices.getUserMedia({ video: true });
                 model = await tmPose.load(URL + "model.json", URL + "metadata.json");
-                
-                // 3. ตั้งค่า Webcam
                 const size = 400;
                 webcam = new tmPose.Webcam(size, size, true); 
                 await webcam.setup(); 
                 await webcam.play();
-                
                 const canvas = document.getElementById("canvas");
                 canvas.width = size; canvas.height = size;
                 ctx = canvas.getContext("2d");
-
                 btn.style.display = "none";
                 isRunning = true;
                 window.requestAnimationFrame(loop);
-                
             } catch (e) {
-                console.error(e);
-                alert("เปิดกล้องไม่ได้: โปรดกดรูปแม่กุญแจ 🔒 ที่แถบ URL ด้านบน แล้วเลือก 'อนุญาต (Allow)' กล้องจ้า");
-                btn.disabled = false;
-                btn.innerText = "ลองใหม่อีกครั้ง";
+                alert("เปิดกล้องไม่ได้: โปรดกดรูปแม่กุญแจ 🔒 ที่แถบ URL แล้วเลือก 'อนุญาต' (Allow) กล้องจ้า");
+                btn.disabled = false; btn.innerText = "ลองใหม่อีกครั้ง";
             }
         }
 
         async function loop() {
-            if (isRunning) {
-                webcam.update();
-                await predict();
-                window.requestAnimationFrame(loop);
-            }
+            if (isRunning) { webcam.update(); await predict(); window.requestAnimationFrame(loop); }
         }
 
         async function predict() {
             const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
             const prediction = await model.predict(posenetOutput);
-
             ctx.drawImage(webcam.canvas, 0, 0);
-            if (pose) {
-                tmPose.drawKeypoints(pose.keypoints, 0.8, ctx);
-                tmPose.drawSkeleton(pose.keypoints, 0.8, ctx);
-            }
-
-            let bestClass = "";
-            let highestProb = 0;
-            prediction.forEach(p => {
-                if (p.probability > highestProb) {
-                    highestProb = p.probability;
-                    bestClass = p.className;
-                }
-            });
-
+            if (pose) { tmPose.drawKeypoints(pose.keypoints, 0.8, ctx); tmPose.drawSkeleton(pose.keypoints, 0.8, ctx); }
+            let bestClass = ""; let highestProb = 0;
+            prediction.forEach(p => { if (p.probability > highestProb) { highestProb = p.probability; bestClass = p.className; } });
             document.getElementById("status-text").innerText = bestClass;
-            document.getElementById("confidence-text").innerText = Math.floor(highestProb * 100) + "%";
-
             if (highestProb > 0.85 && bestClass === "เอียงคอ") {
                 if (lastClass !== "เอียงคอ") {
-                    count++;
-                    document.getElementById("count-number").innerText = count;
+                    count++; document.getElementById("count-number").innerText = count;
                     if (count >= 4) {
                         isRunning = false;
-                        setTimeout(() => {
-                            alert("🎉 เก่งมาก! ทำครบ 4 ครั้งแล้วครับ");
-                            count = 0;
-                            document.getElementById("count-number").innerText = "0";
-                            isRunning = true;
-                            window.requestAnimationFrame(loop);
-                        }, 100);
+                        setTimeout(() => { alert("🎉 ครบ 4 ครั้งแล้วจ้า!"); count = 0; document.getElementById("count-number").innerText = "0"; isRunning = true; window.requestAnimationFrame(loop); }, 100);
                     }
                 }
             }
