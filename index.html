@@ -16,59 +16,76 @@
         body { 
             font-family: 'Kodchasan', sans-serif; 
             margin: 0; padding: 10px; 
-            background-image: url('42493.jpg'); 
-            background-size: cover; background-position: center;
+            background-color: #f0f7f4; 
+            background-image: url('https://img5.pic.in.th/file/secure-sv1/42493.jpg'); 
+            background-size: cover; 
+            background-position: center;
             background-attachment: fixed;
             display: flex; justify-content: center; align-items: center; min-height: 100vh;
         }
 
+        /* ดีไซน์กระจกใส (Glassmorphism) */
         .card { 
-            background-image: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url('42493.jpg');
-            background-size: cover; padding: 25px; border-radius: 35px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 100%; max-width: 400px; 
-            text-align: center; backdrop-filter: blur(5px); border: 2px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.4); 
+            padding: 30px 25px; 
+            border-radius: 40px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        h1 { color: #1e8449; font-size: 2rem; margin: 0; font-weight: 700; }
-        p { font-size: 1rem; color: #2c3e50; margin: 10px 0 20px 0; font-weight: 400; }
+        h1 { color: #1e8449; font-size: 2.2rem; margin: 0; font-weight: 700; letter-spacing: -1px; text-shadow: 0 2px 4px rgba(255,255,255,0.5); }
+        p { font-size: 1.1rem; color: #2c3e50; margin: 5px 0 25px 0; font-weight: 600; }
 
         #canvas-container { 
             position: relative; width: 100%; aspect-ratio: 1 / 1; 
-            margin: 0 auto 15px auto; border: 5px solid #2ecc71; 
-            border-radius: 25px; background: #000; overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            margin: 0 auto 20px auto; border: 6px solid #2ecc71; 
+            border-radius: 35px; background: #000; overflow: hidden;
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.3);
         }
 
         canvas { width: 100% !important; height: 100% !important; object-fit: cover; }
 
-        .counter { font-size: 5.5rem; font-weight: 700; color: #1e8449; line-height: 1; margin-bottom: 15px; }
-        .status-bar { background: rgba(255, 255, 255, 0.6); padding: 12px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(46, 204, 113, 0.3); }
+        .counter { font-size: 6.5rem; font-weight: 700; color: #1e8449; line-height: 1; margin-bottom: 15px; }
+        
+        .status-bar { 
+            background: rgba(255, 255, 255, 0.45); 
+            padding: 15px; border-radius: 25px; 
+            margin-bottom: 25px; border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
         
         button { 
             background: #27ae60; color: white; border: none; width: 100%; 
-            padding: 18px; border-radius: 50px; font-size: 1.3rem; 
+            padding: 20px; border-radius: 50px; font-size: 1.4rem; 
             cursor: pointer; font-weight: 700; font-family: 'Kodchasan', sans-serif;
-            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.4);
+            transition: all 0.3s ease;
         }
+        button:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
     <div class="card">
         <h1>Happy Move</h1>
-        <p>เป้าหมาย: เอียงคอ (neck) ให้ครบ 4 ครั้ง</p>
+        <p>เป้าหมาย: เอียงคอให้ครบ 4 ครั้ง</p>
 
         <div id="canvas-container">
             <canvas id="canvas"></canvas>
         </div>
 
         <div class="counter">
-            <span id="count-number">0</span><span style="font-size: 1.5rem; color: #1e8449; opacity: 0.5;"> / 4</span>
+            <span id="count-number">0</span><span style="font-size: 1.8rem; color: #2c3e50; opacity: 0.5; margin-left: 5px;">/ 4</span>
         </div>
 
         <div class="status-bar">
-            <div>สถานะ: <span id="status-text" style="color: #1e8449; font-weight: 700;">รอเปิดกล้อง</span></div>
-            <div style="font-size: 0.8rem; color: #566573; margin-top: 4px;">ความแม่นยำ: <span id="confidence-text">0%</span></div>
+            <div style="font-weight: 700; color: #2c3e50;">สถานะ: <span id="status-text" style="color: #1e8449;">รอกดเริ่ม</span></div>
+            <div style="font-size: 0.85rem; color: #4a6655; margin-top: 5px;">ความแม่นยำ: <span id="confidence-text">0%</span></div>
         </div>
 
         <button id="start-btn" onclick="init()">เริ่มใช้งานกล้อง</button>
@@ -82,19 +99,18 @@
 
         async function init() {
             const btn = document.getElementById("start-btn");
-            btn.innerText = "กำลังขอสิทธิ์กล้อง...";
+            btn.innerText = "กำลังขอสิทธิ์เข้าใช้งาน...";
             btn.disabled = true;
 
             try {
-                // โหลดโมเดล
-                if(!model) model = await tmPose.load(URL + "model.json", URL + "metadata.json");
+                // ขั้นตอนบังคับขอสิทธิ์กล้อง (สำคัญมากสำหรับ GitHub Pages)
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(track => track.stop()); // ปิด stream ชั่วคราวหลังได้รับสิทธิ์
+
+                model = await tmPose.load(URL + "model.json", URL + "metadata.json");
                 
                 const size = 400;
-                // ตั้งค่ากล้องแบบระบุละเอียดขึ้น
                 webcam = new tmPose.Webcam(size, size, true); 
-                
-                // ขั้นตอนการขออนุญาตกล้อง
-                await navigator.mediaDevices.getUserMedia({ video: true }); // บังคับให้เบราว์เซอร์ถาม Permission
                 await webcam.setup(); 
                 await webcam.play();
                 
@@ -108,7 +124,7 @@
                 
             } catch (e) {
                 console.error(e);
-                alert("เปิดกล้องไม่ได้: โปรดคลิกที่รูปแม่กุญแจ 🔒 ตรงแถบ URL แล้วเลือก 'อนุญาต (Allow)' กล้อง");
+                alert("วิธีแก้: คลิกรูปแม่กุญแจ 🔒 ที่แถบที่อยู่ด้านบน แล้วเลือก 'อนุญาต (Allow)' กล้องจ้า\n\n(ตรวจสอบว่าใช้ลิงก์ https:// เสมอ)");
                 btn.disabled = false;
                 btn.innerText = "ลองใหม่อีกครั้ง";
             }
@@ -142,7 +158,7 @@
             });
 
             document.getElementById("status-text").innerText = bestClass;
-            document.getElementById("confidence-text").innerText = (highestProb * 100).toFixed(0) + "%";
+            document.getElementById("confidence-text").innerText = Math.floor(highestProb * 100) + "%";
 
             if (highestProb > 0.85 && bestClass === "เอียงคอ") {
                 if (lastClass !== "เอียงคอ") {
@@ -151,7 +167,7 @@
                     if (count >= 4) {
                         isRunning = false;
                         setTimeout(() => {
-                            alert("🎉 ครบ 4 ครั้งแล้วจ้า!");
+                            alert("🎉 ยอดเยี่ยม! คุณทำครบ 4 ครั้งแล้ว");
                             count = 0;
                             document.getElementById("count-number").innerText = "0";
                             isRunning = true;
